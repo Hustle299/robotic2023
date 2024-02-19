@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- <gazebo reference="left_wheel">
+        <mu1>1000</mu1>
+        <mu2>1000</mu2>
+        <kp>100000.0</kp>
+        <kd>10.0</kd>
+        <minDepth>0.001</minDepth>
+        <maxVel>10.0</maxVel>
+        <fdir1>1 0 0</fdir1>
+    </gazebo>
+
+    <gazebo reference="right_wheel">
+        <mu1>1000</mu1>
+        <mu2>1000</mu2>
+        <kp>100000.0</kp>
+        <kd>10.0</kd>
+        <minDepth>0.001</minDepth>
+        <maxVel>10.0</maxVel>
+        <fdir1>1 0 0</fdir1>
+    </gazebo> -->
+
+    <gazebo reference="caster_wheel_1">
+        <mu1>0.1</mu1>
+        <mu2>0.1</mu2>
+        <kp>10000.0</kp>
+        <kd>1000.0</kd>
+        <maxVel>10.0</maxVel>
+    </gazebo>
+
+    <gazebo reference="caster_wheel_2">
+        <mu1>0.1</mu1>
+        <mu2>0.1</mu2>
+        <kp>10000.0</kp>
+        <kd>1000.0</kd>
+        <maxVel>10.0</maxVel>
+    </gazebo>
+
+    <gazebo reference="caster_wheel_3">
+        <mu1>0.1</mu1>
+        <mu2>0.1</mu2>
+        <kp>10000.0</kp>
+        <kd>1000.0</kd>
+        <maxVel>10.0</maxVel>
+    </gazebo>
+    
+    <gazebo reference="caster_wheel_4">
+        <mu1>0.1</mu1>
+        <mu2>0.1</mu2>
+        <kp>10000.0</kp>
+        <kd>1000.0</kd>
+        <maxVel>10.0</maxVel>
+    </gazebo>
+
+
+    <xacro:unless value="$(arg use_sim_time)">
+        <ros2_control name="RealRobot" type="system">
+            <hardware>
+                <plugin>diffdrive_arduino/DiffDriveArduino</plugin>
+                <param name="Left_wheel_joint">left_wheel_joint</param>
+                <param name="Right_wheel_joint">right_wheel_joint</param>
+                <param name="loop_rate">30</param>
+                <param name="device">/dev/ttyUSB0</param>
+                <param name="baud_rate">57600</param>
+                <param name="timeout">1000</param>
+                <param name="enc_counts_per_rev">3436</param>
+            </hardware>
+            <joint name="left_wheel_joint">
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+                <state_interface name="velocity" />
+                <state_interface name="position" />
+            </joint>
+            <joint name="right_wheel_joint">
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+                <state_interface name="velocity" />
+                <state_interface name="position" />
+            </joint>
+        </ros2_control>
+    </xacro:unless>
+
+    <xacro:if value="$(arg use_sim_time)">
+        <ros2_control name="GazeboSystem" type="system">
+            <hardware>
+                <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+            </hardware>
+            <joint name="left_wheel_joint">
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+                <state_interface name="position" />
+                <param name="initial_value">0.0</param>
+                <state_interface name="velocity" />
+            </joint>
+            <joint name="right_wheel_joint">
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+                <state_interface name="position" />
+                <param name="initial_value">0.0</param>
+                <state_interface name="velocity" />
+            </joint>
+        </ros2_control>
+        <gazebo>
+            <plugin name="joint_state_broadcaster" filename="libgazebo_ros_joint_state_publisher.so">
+                <ros>
+                    <remapping>~/out:=joint_states</remapping>
+                    <remapping>/tf:=tf</remapping>
+                </ros>
+                <update_rate>60</update_rate>
+                <joint_name>right_wheel_joint</joint_name>
+                <joint_name>left_wheel_joint</joint_name>
+            </plugin>
+        </gazebo>
+    </xacro:if>
+    
+    <gazebo>
+        <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+            <parameters>$(find robot_description)/config/ros2_controllers.yaml</parameters>
+            <parameters>$(find robot_description)/config/gaz_ros2_ctl_use_sim.yaml</parameters>
+        </plugin>
+    </gazebo>
+
+</robot>
